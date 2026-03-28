@@ -3,5 +3,3 @@ tensorflow
 numpy
 scikit-learn
 requests
-SpeechRecognition
-pyaudio
