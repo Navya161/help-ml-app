@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 import pickle
 import requests
-import speech_recognition as sr
+
 
 # ---------------- CONFIG ----------------
 st.set_page_config(page_title="HELP-ML", layout="centered")
@@ -90,15 +90,7 @@ def get_location():
         return "Unknown"
 
 def voice_to_text():
-    r = sr.Recognizer()
-    try:
-        with sr.Microphone() as source:
-            st.info("🎤 Speak now...")
-            audio = r.listen(source, timeout=5)
-        text = r.recognize_google(audio)
-        return text
-    except:
-        return "Voice input failed"
+    return "Voice input not supported in web version"
 
 # ---------------- SESSION ----------------
 if "page" not in st.session_state:
