@@ -1,38 +1,29 @@
 import streamlit as st
 import numpy as np
-
 import pickle
 import requests
-
+import random
 
 # ---------------- CONFIG ----------------
 st.set_page_config(page_title="HELP-ML", layout="centered")
 
-# ---------------- UI STYLE ----------------
+# ---------------- UI ----------------
 st.markdown("""
 <style>
-
-/* Background */
 .stApp {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
 }
-
-/* Glass effect */
 .block-container {
     background: rgba(255, 255, 255, 0.12);
     padding: 1.5rem;
     border-radius: 20px;
     backdrop-filter: blur(12px);
 }
-
-/* Titles */
 h1, h2, h3 {
     text-align: center;
     color: white;
 }
-
-/* Buttons */
 .stButton>button {
     background: linear-gradient(45deg, #ff4b4b, #ff8c00);
     color: white;
@@ -42,17 +33,6 @@ h1, h2, h3 {
     font-size: 18px;
     border: none;
 }
-
-/* Inputs */
-.stCheckbox label {
-    font-size: 18px !important;
-}
-
-textarea {
-    font-size: 16px !important;
-}
-
-/* Center fix */
 .main-container {
     display: flex;
     flex-direction: column;
@@ -61,26 +41,17 @@ textarea {
     min-height: 80vh;
     text-align: center;
 }
-
 .title {
     font-size: 42px;
     font-weight: bold;
 }
-
 .subtitle {
     font-size: 18px;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- LOAD MODEL ----------------
-
-
-with open("vectorizer.pkl", "rb") as f:
-    vectorizer = pickle.load(f)
-
-# ---------------- FUNCTIONS ----------------
+# ---------------- LOCATION ----------------
 def get_location():
     try:
         res = requests.get("https://ipinfo.io/json")
@@ -88,9 +59,6 @@ def get_location():
         return data.get("city", "Unknown")
     except:
         return "Unknown"
-
-def voice_to_text():
-    return "Voice input not supported in web version"
 
 # ---------------- SESSION ----------------
 if "page" not in st.session_state:
@@ -108,8 +76,6 @@ if st.session_state.page == 1:
         <div class="subtitle">Human Emergency Priority Prediction</div>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button("Start ➡️"):
         st.session_state.page = 2
@@ -138,16 +104,7 @@ elif st.session_state.page == 2:
         unconscious = st.checkbox("Unconscious", key=f"u{i}")
         breathing = st.checkbox("Breathing Issue", key=f"br{i}")
 
-        col1, col2 = st.columns([3,1])
-
-        with col1:
-            text = st.text_area("Description", key=f"t{i}")
-
-        with col2:
-            if st.button("🎤", key=f"mic{i}"):
-                spoken = voice_to_text()
-                st.session_state[f"t{i}"] = spoken
-                st.rerun()
+        text = st.text_area("Description", key=f"t{i}")
 
         st.markdown("---")
 
@@ -170,18 +127,12 @@ elif st.session_state.page == 3:
     max_case = -1
     classes = ["LOW", "MEDIUM", "HIGH"]
 
+    # -------- FIXED LOOP --------
     with st.spinner("Analyzing cases..."):
         for idx, data in enumerate(st.session_state.cases):
 
-            symptoms = np.array([data[:5]])
-            text_vec = vectorizer.transform([data[5]]).toarray()
-
-            input_data = np.concatenate((symptoms, text_vec), axis=1)
-
-            import random
-
-pred = [random.random(), random.random(), random.random()]
-level = pred.index(max(pred))
+            pred = [random.random(), random.random(), random.random()]
+            level = pred.index(max(pred))
 
             if level > max_level:
                 max_level = level
@@ -192,7 +143,7 @@ level = pred.index(max(pred))
     st.success(f"✅ Highest Emergency Case: Case {max_case}")
     st.error(f"🚑 Level: {classes[max_level]}")
 
-    # ---------------- SMART SUGGESTION ----------------
+    # -------- SMART MESSAGE --------
     if classes[max_level] == "HIGH":
         st.error("🚨 Immediate action required! Call ambulance!")
     elif classes[max_level] == "MEDIUM":
@@ -200,7 +151,7 @@ level = pred.index(max(pred))
     else:
         st.success("✅ Low risk. Monitor patient.")
 
-    # ---------------- EMERGENCY CALL ----------------
+    # -------- CALL BUTTON --------
     st.markdown("### 🚑 Emergency Help")
 
     st.markdown("""
@@ -217,8 +168,6 @@ level = pred.index(max(pred))
     </button>
     </a>
     """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button("🔄 Restart"):
         st.session_state.page = 1
