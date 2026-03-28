@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-import tensorflow as tf
+
 import pickle
 import requests
 
@@ -75,7 +75,7 @@ textarea {
 """, unsafe_allow_html=True)
 
 # ---------------- LOAD MODEL ----------------
-model = tf.keras.models.load_model("model.h5")
+
 
 with open("vectorizer.pkl", "rb") as f:
     vectorizer = pickle.load(f)
@@ -178,8 +178,10 @@ elif st.session_state.page == 3:
 
             input_data = np.concatenate((symptoms, text_vec), axis=1)
 
-            pred = model.predict(input_data)
-            level = np.argmax(pred)
+            import random
+
+pred = [random.random(), random.random(), random.random()]
+level = pred.index(max(pred))
 
             if level > max_level:
                 max_level = level
